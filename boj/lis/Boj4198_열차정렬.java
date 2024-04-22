@@ -3,51 +3,44 @@ package lis;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.LinkedList;
 
 public class Boj4198_열차정렬 {
-    static int[] memo;
+    static LinkedList<Integer> list;
     public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         int N = Integer.parseInt(br.readLine());
-        int[] arr = new int[N];
+        int arr[] = new int[N];
         for(int i=0; i<N; i++) {
             arr[i] = Integer.parseInt(br.readLine());
         }
 
-        memo = new int[N];
-        int total = 0;
-        int len = 0;
-        int idx = 0;
-        for(int i=0; i<N; i++) {
-            if(arr[i] > memo[len]) {
-                memo[len++] = arr[i];
-            } else {
-                idx = binarySearch(0,len,arr[i]);
-                memo[idx] = arr[i];
+        list = new LinkedList<>();
+        if(N > 0) {
+            list.add(arr[0]);
+        }
+        for(int i=1; i<N; i++) {
+            int pos = binarySearch(0, list.size(), arr[i]);
+            if(pos == 0 || pos == list.size()) {
+                list.add(pos,arr[i]);
+            } else if(pos == 1) {
+                list.removeFirst();
+                list.addFirst(Math.max(list.get(0),arr[i]));
+            } else if(pos == list.size()-2) {
+                list.removeLast();
+                list.addLast(Math.min(list.get(list.size()-1),arr[i]));
             }
         }
-        total = len;
-        len = 0;
-        idx = 0;
-        memo = new int[N];
-        for(int i=N-1; i>=0; i--) {
-            if(arr[i] > memo[len]) {
-                memo[len++] = arr[i];
-            } else {
-                idx = binarySearch(0,len,arr[i]);
-                memo[idx] = arr[i];
-            }
-        }
-        total += (len-1);
-        System.out.println(total);
+        System.out.println(list.size());
     }
 
     static int binarySearch(int left, int right, int key) {
-        int mid;
-        while(left<right) {
+        int mid = (left+right)/2;
+        while(left < right) {
             mid = (left+right)/2;
-            if(memo[mid] < key) {
-                left = mid+1;
+            if(mid >= list.size()) return list.size();
+            if(list.get(mid) < key) {
+                left = mid + 1;
             } else {
                 right = mid;
             }
