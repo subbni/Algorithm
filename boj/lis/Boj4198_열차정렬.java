@@ -3,48 +3,45 @@ package lis;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
 
 public class Boj4198_열차정렬 {
-    static LinkedList<Integer> list;
     public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         int N = Integer.parseInt(br.readLine());
-        int arr[] = new int[N];
+        int[] arr = new int[N];
+        int[] inDp = new int[N];
+        int[] deDp = new int[N];
         for(int i=0; i<N; i++) {
             arr[i] = Integer.parseInt(br.readLine());
         }
 
-        list = new LinkedList<>();
-        if(N > 0) {
-            list.add(arr[0]);
-        }
-        for(int i=1; i<N; i++) {
-            int pos = binarySearch(0, list.size(), arr[i]);
-            if(pos == 0 || pos == list.size()) {
-                list.add(pos,arr[i]);
-            } else if(pos == 1) {
-                list.removeFirst();
-                list.addFirst(Math.max(list.get(0),arr[i]));
-            } else if(pos == list.size()-2) {
-                list.removeLast();
-                list.addLast(Math.min(list.get(list.size()-1),arr[i]));
+        for(int i=0; i<N; i++) {
+            inDp[i] = 1;
+            deDp[i] = 1;
+            for(int j=0; j<i; j++) {
+                if(arr[i] > arr[j]) {
+                    // LIS
+                    inDp[i] = Math.max(inDp[i], inDp[j]+1);
+                } else {
+                    // LDS
+                    deDp[i] = Math.max(deDp[i], deDp[j]+1);
+                }
             }
         }
-        System.out.println(list.size());
-    }
 
-    static int binarySearch(int left, int right, int key) {
-        int mid = (left+right)/2;
-        while(left < right) {
-            mid = (left+right)/2;
-            if(mid >= list.size()) return list.size();
-            if(list.get(mid) < key) {
-                left = mid + 1;
-            } else {
-                right = mid;
+        int inMax = 0;
+        int idx = 0;
+        int deMax = 0;
+        for(int i=0; i<N; i++) {
+            if(inMax < inDp[i]) {
+                inMax = inDp[i];
+                idx = i;
             }
         }
-        return right;
+        for(int i=0; i<idx; i++) {
+            if(deMax < deDp[i]) deMax = deDp[i];
+        }
+
+        System.out.println(N==0? 0: inMax+deMax-1);
     }
 }
